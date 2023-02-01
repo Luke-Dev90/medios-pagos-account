@@ -1,7 +1,8 @@
 package com.lchalela.medios.pagos.account.mapper;
 
-import org.mapstruct.Mapper;
+import java.util.List;
 
+import org.mapstruct.Mapper;
 import com.lchalela.medios.pagos.account.dto.AccountCompletDTO;
 import com.lchalela.medios.pagos.account.dto.AccountCreateDTO;
 import com.lchalela.medios.pagos.account.dto.AccountResponseDTO;
@@ -13,4 +14,6 @@ public interface AccountMapper {
 	Account accountCreateTOaccount(AccountCreateDTO accountCreateDTO);
 	AccountResponseDTO accountToAccountResponseDTO(Account account);
 	AccountCompletDTO accountToAccountCompleteDTO(Account account);
+	Account accountCompleteDtoTOAccount(AccountCompletDTO accountComplete);
+	List<AccountCompletDTO> accountToAccountCompleteDTO(List<Account> account);
 }

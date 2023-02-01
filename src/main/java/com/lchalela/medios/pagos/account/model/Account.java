@@ -1,6 +1,7 @@
 package com.lchalela.medios.pagos.account.model;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -18,17 +19,16 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "account")
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class Account {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	private BigDecimal balance;
 	private String typeAccount;
+	private String accountNumber;
 	private String cbu;
 	private String alias;
 	private Long userId;
 	@Transient
-	private TransactionDTO transactionDTO;
+	private List<TransactionDTO> transactionDTO;
 }

@@ -9,4 +9,5 @@ import com.lchalela.medios.pagos.account.model.Account;
 public interface AccountRepository extends JpaRepository<Account, Long> {
 	public Account findAccountByUserId(Long id);
 	public Account findAccountByCbuOrAlias(String cbu, String alias); 
+	public void deleteAccountByAccountNumber(String nroCuenta);
 }

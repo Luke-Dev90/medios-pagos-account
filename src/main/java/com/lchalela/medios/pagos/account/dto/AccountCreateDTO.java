@@ -1,14 +1,12 @@
 package com.lchalela.medios.pagos.account.dto;
 
-import java.math.BigDecimal;
-
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
-public class AccountCreateDTO {
-	private BigDecimal balance;
+public class AccountCreateDTO {	
+	private String name;
+	private String lastName;
 	private String typeAccount;
-	private String cbu;
-	private String alias;
 	private Long userId;
 }

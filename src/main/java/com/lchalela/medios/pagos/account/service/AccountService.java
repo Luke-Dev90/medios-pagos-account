@@ -1,14 +1,20 @@
 package com.lchalela.medios.pagos.account.service;
 
-import java.math.BigDecimal;
+import java.util.List;
 
 import com.lchalela.medios.pagos.account.dto.AccountCompletDTO;
 import com.lchalela.medios.pagos.account.dto.AccountCreateDTO;
+import com.lchalela.medios.pagos.account.dto.AccountDTOresponse;
 import com.lchalela.medios.pagos.account.dto.AccountResponseDTO;
+import com.lchalela.medios.pagos.account.dto.NewTransactionDTO;
+import com.lchalela.medios.pagos.account.model.Account;
 
 public interface AccountService {
-	AccountCompletDTO getAccountByUserID(Long id) throws Exception;
+	List<AccountCompletDTO> getAccountByUserID(Long id) throws Exception;
+	
 	AccountResponseDTO getAccountByCbuOrAlias(String cbu, String alias) throws Exception;
-	void transferByCbuOrAlias(String cbuOrigin, String cbuDestination, String aliasDestination, BigDecimal amount);
-	AccountCompletDTO createAccount(AccountCreateDTO accountCreateDTO);
+	Account getAccountEntityByCbuOrAlias(String cbu, String alias);
+	public AccountDTOresponse transferByCbuOrAlias(NewTransactionDTO transaction) throws Exception;
+	void deleteAccount(String nroAccount);
+	List<AccountCompletDTO>  createAccount(AccountCreateDTO accountCreateDTO);
 }
