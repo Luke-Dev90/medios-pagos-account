@@ -3,8 +3,6 @@ package com.lchalela.medios.pagos.account.service;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,11 +12,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.lchalela.medios.pagos.account.client.TransactionRest;
 import com.lchalela.medios.pagos.account.dto.AccountCompletDTO;
 import com.lchalela.medios.pagos.account.dto.AccountCreateDTO;
 import com.lchalela.medios.pagos.account.dto.AccountDTOresponse;
 import com.lchalela.medios.pagos.account.dto.AccountResponseDTO;
+import com.lchalela.medios.pagos.account.dto.CbuDTO;
 import com.lchalela.medios.pagos.account.dto.NewTransactionDTO;
+import com.lchalela.medios.pagos.account.dto.TransactionDTO;
 import com.lchalela.medios.pagos.account.mapper.AccountMapper;
 import com.lchalela.medios.pagos.account.model.Account;
 import com.lchalela.medios.pagos.account.repository.AccountRepository;
@@ -30,34 +31,63 @@ public class AccountServiceImpl implements AccountService {
 	private Logger logger = LoggerFactory.getLogger(AccountServiceImpl.class);
 	private AccountRepository accountRepository;
 	private AccountMapper accountMapper;
+	private TransactionRest transactionRest;
 	
 	@Autowired
-	public AccountServiceImpl(AccountRepository accountRepository, AccountMapper accountMapper) {
+	public AccountServiceImpl(AccountRepository accountRepository,
+			AccountMapper accountMapper,TransactionRest transactionRest) {
 		this.accountRepository = accountRepository;
 		this.accountMapper = accountMapper;
+		this.transactionRest = transactionRest;
 	}
 
 	@Override
 	public List<AccountCompletDTO> getAccountByUserID(Long id) throws Exception {	
-		List<Account> accountDTO = Stream.of( 
-				this.accountRepository.findAccountByUserId(id) 
-				).collect(Collectors.toList());
+		
+		logger.info("init find account by user id");
+		
+		List<Account> accountDTO = this.accountRepository.findAccountByUserIdAndIsActivedTrue(id);
+
+		try {
+			
+			for (Account account : accountDTO) {		
+				CbuDTO cbuDTO = new CbuDTO();
+				cbuDTO.setAccountOrigin( account.getCbu() );
+				List<TransactionDTO> transactions = 
+						this.transactionRest.getAllTransaction( cbuDTO );
+				account.setTransactionDTO(transactions);
+			}
+			
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+		}
+		
+		logger.info("return account");
 		return this.accountMapper.accountToAccountCompleteDTO( accountDTO );
 	}
 
 	@Override
 	public AccountResponseDTO getAccountByCbuOrAlias(String cbu, String alias) throws Exception {
-		Account account = Optional.of( this.accountRepository.findAccountByCbuOrAlias(cbu, alias))
-				.orElseThrow( () -> new ResponseStatusException(HttpStatus.NOT_FOUND,"Account not found"));
-		
+		logger.info("get account by cbu or alias -> cbu:".concat(cbu).concat(" alias: ").concat(alias) );
+		Account account = Optional.of( this.accountRepository.findAccountByCbuOrAliasAndIsActivedTrue(cbu, alias))
+				.orElseThrow( 
+						() -> {
+							logger.error("Account not found -> cbu:".concat(cbu).concat(" alias:").concat(alias) );
+							return new ResponseStatusException(HttpStatus.NOT_FOUND,"Account not found");						
+						}
+						);
+		logger.info("return account");
 		return this.accountMapper.accountToAccountResponseDTO(account);
 	}
 
 	@Override
 	public List<AccountCompletDTO> createAccount(AccountCreateDTO accountCreateDTO) {
-		logger.info("Inicio de la creacion de cuenta");
+		
+		logger.info("init register new account");
+		
 		Account account = new Account();
 		
+		logger.info("set account ");
 		account.setBalance( new BigDecimal(0));
 		account.setTypeAccount( accountCreateDTO.getTypeAccount());
 		account.setAccountNumber( generateNumbers(10) );
@@ -70,6 +100,7 @@ public class AccountServiceImpl implements AccountService {
 				);
 		account.setUserId( accountCreateDTO.getUserId());
 
+		logger.info("return list DTO");
 		return this.accountMapper
 				.accountToAccountCompleteDTO( List.of( this.accountRepository.save( account)) );
 	}
@@ -77,49 +108,62 @@ public class AccountServiceImpl implements AccountService {
 	@Override
 	@Transactional
 	public AccountDTOresponse transferByCbuOrAlias(NewTransactionDTO transaction) throws Exception {
-		// find the accounts.
 		
+		logger.info("Checks accounts");
 		Account accountOrigin = this.getAccountEntityByCbuOrAlias(transaction.getAccountOrigin(), "");
 		
 		Account accountDestination = this.getAccountEntityByCbuOrAlias(
 										transaction.getCbuDestination(),
 										transaction.getAliasDestination());
+		
+		if(accountOrigin.getIsActived() != true) {
+			throw new Exception("The account origin is not actived");
+		}
+		
+		if(accountDestination.getIsActived() != true) {
+			throw new Exception("The account destinatiton is not actived");
+		}
+		
 		//TODO: Validar que este dentro del dia
 		
-		// check amount Not negative and enough
-		logger.info("Consultando saldo en la cuenta de origen");
+		logger.info("check amount Not negative and enough");
 		if( accountOrigin.getBalance().signum() == -1 & 
 				accountOrigin.getBalance().floatValue() < transaction.getAmount().floatValue() ) {
 			throw new Exception("money in the account is not enough");
 		}
 
-		logger.info("Actualizando estados");
+		logger.info("update balance in the accounts");
 		accountOrigin.setBalance(  accountOrigin.getBalance().subtract(transaction.getAmount()) );
 		accountDestination.setBalance( accountDestination.getBalance().add(transaction.getAmount()) );
 		
-		logger.info("persistiendo cuentas en db");
-		
-		logger.info("Cuenta origen" + accountOrigin.toString() );
+		logger.info("update account in db");
 		this.accountRepository.save(accountOrigin);
-		
-		logger.info("Cuenta destino" + accountDestination.toString() );
 		this.accountRepository.save(accountDestination);
-		
+			
+		logger.info("Return cbu origin and destination");
 		AccountDTOresponse accountDTOresponse = new AccountDTOresponse();
 		accountDTOresponse.setAccountDestination( accountDestination.getCbu());
 		accountDTOresponse.setAccountOrigin( accountOrigin.getCbu() );
-
 		return accountDTOresponse;
 	}
 
 	@Override
 	public Account getAccountEntityByCbuOrAlias(String cbu, String alias) {
-		Account account = Optional.of( this.accountRepository.findAccountByCbuOrAlias(cbu, alias) )
-				.orElseThrow( () -> new ResponseStatusException( HttpStatus.NOT_FOUND,"Account not found"));	
+		//TODO: return account enabled
+		logger.info("Init get Entity by cbu or alias cbu: ".concat(cbu).concat(" alias: ".concat(alias)));
+		Account account = Optional.of( this.accountRepository.findAccountByCbuOrAliasAndIsActivedTrue(cbu, alias) )
+				.orElseThrow( () 
+						->
+				{
+					logger.error("Account not found by cbu: ".concat(cbu).concat(" alias: ").concat(alias) );
+					return new ResponseStatusException( HttpStatus.NOT_FOUND,"Account not found");
+				}
+						);	
 		return account;
 	}
 	
 	public void deleteAccount(String nroCuenta) {
+		//TODO: add soft deleted
 		this.accountRepository.deleteAccountByAccountNumber(nroCuenta);
 	}
 

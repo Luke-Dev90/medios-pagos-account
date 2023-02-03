@@ -15,5 +15,6 @@ public class AccountCompletDTO {
 	private String cbu;
 	private String alias;
 	private Long userId;
+	private Boolean isActived;
 	private List<TransactionDTO> transactionDTO;
 }

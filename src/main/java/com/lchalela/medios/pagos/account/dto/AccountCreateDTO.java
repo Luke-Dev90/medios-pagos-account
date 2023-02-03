@@ -1,7 +1,6 @@
 package com.lchalela.medios.pagos.account.dto;
 
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
 public class AccountCreateDTO {	

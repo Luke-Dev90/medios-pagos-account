@@ -14,6 +14,6 @@ public class TransactionDTO {
 	private String accountDestination;
 	private String accountOrigin;
 	private String reason;
-	private LocalDateTime dateSent;
+	private LocalDateTime createAt;
 	private BigDecimal amount;
 }

@@ -7,14 +7,12 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import com.lchalela.medios.pagos.account.dto.TransactionDTO;
-
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "account")
@@ -31,4 +29,10 @@ public class Account {
 	private Long userId;
 	@Transient
 	private List<TransactionDTO> transactionDTO;
+	private Boolean isActived;
+	
+	@PrePersist
+	public void newAccount() {
+		isActived = true;
+	}
 }
