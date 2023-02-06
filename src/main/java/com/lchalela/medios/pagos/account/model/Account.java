@@ -11,12 +11,17 @@ import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
+
 import com.lchalela.medios.pagos.account.dto.TransactionDTO;
 import lombok.Data;
 
 @Entity
 @Table(name = "account")
 @Data
+@SQLDelete(sql = "UPDATE account SET is_actived = false WHERE id=?")
+@Where(clause = "is_actived=true")
 public class Account {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -15,6 +15,6 @@ public interface AccountService {
 	AccountResponseDTO getAccountByCbuOrAlias(String cbu, String alias) throws Exception;
 	Account getAccountEntityByCbuOrAlias(String cbu, String alias);
 	public AccountDTOresponse transferByCbuOrAlias(NewTransactionDTO transaction) throws Exception;
-	void deleteAccount(String nroAccount);
+	public void deleteAccount(Long id);
 	List<AccountCompletDTO>  createAccount(AccountCreateDTO accountCreateDTO);
 }

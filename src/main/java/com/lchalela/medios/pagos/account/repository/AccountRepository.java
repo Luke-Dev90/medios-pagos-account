@@ -12,5 +12,4 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
 	
 	public List<Account> findAccountByUserIdAndIsActivedTrue(Long id);
 	public Account findAccountByCbuOrAliasAndIsActivedTrue(String cbu, String alias); 
-	public void deleteAccountByAccountNumber(String nroCuenta);
 }

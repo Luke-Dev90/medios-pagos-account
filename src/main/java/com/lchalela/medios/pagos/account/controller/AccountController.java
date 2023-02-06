@@ -53,10 +53,10 @@ public class AccountController {
 	}
 	
 	@DeleteMapping("/{nroAccount}")
-	public ResponseEntity<?> deleteAccount(@PathVariable String nroAccount){
+	public ResponseEntity<?> deleteAccount(@PathVariable Long nroAccount){
 		logger.info("Request delete account by nroAccount");
 		this.accountService.deleteAccount(nroAccount);
-		return null;
+		return new ResponseEntity<>("Account deleted", HttpStatus.OK);
 	}
 	
 }

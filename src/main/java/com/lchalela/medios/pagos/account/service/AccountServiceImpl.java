@@ -162,9 +162,10 @@ public class AccountServiceImpl implements AccountService {
 		return account;
 	}
 	
-	public void deleteAccount(String nroCuenta) {
-		//TODO: add soft deleted
-		this.accountRepository.deleteAccountByAccountNumber(nroCuenta);
+	@Transactional
+	@Override
+	public void deleteAccount(Long id) {
+		this.accountRepository.deleteById(id);
 	}
 
 }
