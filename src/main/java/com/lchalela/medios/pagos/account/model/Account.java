@@ -16,10 +16,12 @@ import org.hibernate.annotations.Where;
 
 import com.lchalela.medios.pagos.account.dto.TransactionDTO;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "account")
 @Data
+@NoArgsConstructor
 @SQLDelete(sql = "UPDATE account SET is_actived = false WHERE id=?")
 @Where(clause = "is_actived=true")
 public class Account {
@@ -27,6 +29,8 @@ public class Account {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	private BigDecimal balance;
+	private BigDecimal pendingTransaction;
+	private BigDecimal pedingAccreditation;
 	private String typeAccount;
 	private String accountNumber;
 	private String cbu;
