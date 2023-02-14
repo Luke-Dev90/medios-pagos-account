@@ -9,12 +9,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import com.lchalela.medios.pagos.account.dto.CbuDTO;
 import com.lchalela.medios.pagos.account.dto.TransactionDTO;
 
-@FeignClient(name = "transaction-service" , url = "localhost:8084")
+@FeignClient(name = "transaction-service")
 public interface TransactionRest {
 
-	@PostMapping("/transaction/new")
+	@PostMapping("/v1/new")
 	public void registerTransaction(TransactionDTO transactionDTO);
 	
-	@PostMapping("/transaction/all")
+	@PostMapping("/v1/all")
 	public List<TransactionDTO> getAllTransaction(@RequestBody CbuDTO accountOrigin);
 }

@@ -7,8 +7,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import com.lchalela.medios.pagos.account.dto.NewTransactionDTO; 
 
-@FeignClient(name = "ms-publiher", url = "localhost:8086")
+@FeignClient(name = "ms-publisher")
 public interface PublisherRest {
-	@PostMapping("api/v1/new")
+	@PostMapping("/v1/new")
 	public ResponseEntity<String> createMessage(@RequestBody NewTransactionDTO transaction);
 }
