@@ -28,6 +28,9 @@ import com.lchalela.medios.pagos.account.exception.AmountNotEnoughException;
 import com.lchalela.medios.pagos.account.mapper.AccountMapper;
 import com.lchalela.medios.pagos.account.model.Account;
 import com.lchalela.medios.pagos.account.repository.AccountRepository;
+
+import brave.Tracer;
+
 import static com.lchalela.medios.pagos.account.utils.NumberGenerator.generateNumbers;;
 
 @Service
@@ -38,14 +41,16 @@ public class AccountServiceImpl implements AccountService {
 	private AccountMapper accountMapper;
 	private TransactionRest transactionRest;
 	private PublisherRest publisherRest;
-
+	private Tracer tracer;
+	
 	@Autowired
 	public AccountServiceImpl(AccountRepository accountRepository, AccountMapper accountMapper,
-			TransactionRest transactionRest,PublisherRest publisherRest) {
+			TransactionRest transactionRest,PublisherRest publisherRest,Tracer tracer) {
 		this.accountRepository = accountRepository;
 		this.accountMapper = accountMapper;
 		this.transactionRest = transactionRest;
 		this.publisherRest = publisherRest;
+		this.tracer = tracer;
 	}
 
 	@Override
@@ -66,6 +71,7 @@ public class AccountServiceImpl implements AccountService {
 
 		} catch (Exception e) {
 			logger.error(e.getMessage());
+			tracer.currentSpan().tag("error", e.getMessage());
 		}
 
 		logger.info("return account");
@@ -77,7 +83,9 @@ public class AccountServiceImpl implements AccountService {
 		logger.info("get account by cbu or alias -> cbu:".concat(cbu).concat(" alias: ").concat(alias));
 		Account account = Optional.of(this.accountRepository.findAccountByCbuOrAliasAndIsActivedTrue(cbu, alias))
 				.orElseThrow(() -> {
-					logger.error("Account not found -> cbu:".concat(cbu).concat(" alias:").concat(alias));
+					String error = "Account not found -> cbu:".concat(cbu).concat(" alias:").concat(alias);
+					logger.error(error);
+					tracer.currentSpan().tag("error",error);
 					return new ResponseStatusException(HttpStatus.NOT_FOUND, "Account not found");
 				});
 		logger.info("return account");
@@ -140,7 +148,9 @@ public class AccountServiceImpl implements AccountService {
 				}
 				
 			} else {
-				throw new Exception("The date is less that the current date");
+				String error = "The date is less that the current date";
+				tracer.currentSpan().tag("error", error);
+				throw new Exception(error);
 			}
 
 		} else {
@@ -180,14 +190,20 @@ public class AccountServiceImpl implements AccountService {
 	public Boolean checkAmount(BigDecimal amount, BigDecimal amountTransaction) {
 		logger.info("check amount Not negative and enough");
 		if (amount.signum() == -1 || amount.floatValue() < amountTransaction.floatValue()) {
-			throw new AmountNotEnoughException("money in the account is not enough");
+			String error = "money in the account is not enough";
+			logger.error(error);
+			tracer.currentSpan().tag("error", error);
+			throw new AmountNotEnoughException(error);
 		}
 		return true;
 	}
 	
 	public void checkAccountInactived(Account account , String senderOrReceptor) {
 		if (account == null) {
-			throw new AccountInactived("The account " + senderOrReceptor + " is not actived");
+			String error = "The account " + senderOrReceptor + " is not actived";
+			logger.error(error);
+			tracer.currentSpan().tag("error", error);
+			throw new AccountInactived(error);
 		}
 	}
 
