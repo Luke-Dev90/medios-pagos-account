@@ -59,4 +59,10 @@ public class AccountController {
 		return new ResponseEntity<>("Account deleted", HttpStatus.OK);
 	}
 	
+	@PostMapping("/async")
+	public ResponseEntity<?> postAsyncTransaction(@RequestBody NewTransactionDTO transactionDTO){
+		this.accountService.impactAsynTransaction(transactionDTO);
+		return new ResponseEntity<>("Transaction Async OK",HttpStatus.CREATED);
+	}
+	
 }

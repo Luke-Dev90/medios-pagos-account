@@ -17,5 +17,5 @@ public interface AccountService {
 	public AccountDTOresponse transferByCbuOrAlias(NewTransactionDTO transaction) throws Exception;
 	public void deleteAccount(Long id);
 	List<AccountCompletDTO>  createAccount(AccountCreateDTO accountCreateDTO);
-	public void impactAsynTransaction(String message);
+	public void impactAsynTransaction(NewTransactionDTO transaction);
 }

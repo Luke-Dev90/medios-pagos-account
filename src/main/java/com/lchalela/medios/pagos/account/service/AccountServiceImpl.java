@@ -208,8 +208,25 @@ public class AccountServiceImpl implements AccountService {
 	}
 
 	@Override
-	public void impactAsynTransaction(String message) {
-		// TODO: recibe transferencia 
+	public void impactAsynTransaction(NewTransactionDTO transactionDTO) {
+		// TODO: recibe transferencia
+		Account accountOrigin = this.getAccountEntityByCbuOrAlias(transactionDTO.getAccountOrigin(), "");
+
+		Account accountDestination = this.getAccountEntityByCbuOrAlias(transactionDTO.getCbuDestination(),
+				transactionDTO.getAliasDestination());
+		
+		logger.info("SUBTRACT PENDING TRANSACTION");
+		accountOrigin.setPendingTransaction( accountOrigin.getPendingTransaction().subtract( transactionDTO.getAmount() ) );
+		logger.info("SUBTRACT PENDING ACREDITATION");
+		accountDestination.setPedingAccreditation( accountDestination.getPedingAccreditation().subtract(transactionDTO.getAmount()) );
+
+		logger.info("ADD NEW BALANCE");
+		accountDestination.setBalance( accountDestination.getBalance().add( transactionDTO.getAmount()) );
+		
+		
+		logger.info("SAVE ACCOUNTS");
+		this.accountRepository.save(accountOrigin);
+		this.accountRepository.save(accountDestination);
 	}
 	
 
