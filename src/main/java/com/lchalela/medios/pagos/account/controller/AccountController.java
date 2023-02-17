@@ -24,7 +24,7 @@ import com.lchalela.medios.pagos.account.dto.NewTransactionDTO;
 import com.lchalela.medios.pagos.account.service.AccountService;
 
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/v1")
 public class AccountController {
 	
 	@Autowired
