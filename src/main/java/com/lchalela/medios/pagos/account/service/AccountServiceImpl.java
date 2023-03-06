@@ -100,7 +100,6 @@ public class AccountServiceImpl implements AccountService {
 		Account account = new Account();
 
 		logger.info("set account ");
-		account.setBalance(new BigDecimal(0));
 		account.setTypeAccount(accountCreateDTO.getTypeAccount());
 		account.setAccountNumber(generateNumbers(10));
 		account.setCbu(generateNumbers(22));

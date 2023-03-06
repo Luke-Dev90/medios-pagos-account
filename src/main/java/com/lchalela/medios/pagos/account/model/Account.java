@@ -43,5 +43,8 @@ public class Account {
 	@PrePersist
 	public void newAccount() {
 		isActived = true;
+		this.balance = new BigDecimal(0);
+		this.pendingTransaction = new BigDecimal(0);
+		this.pedingAccreditation = new BigDecimal(0);
 	}
 }
